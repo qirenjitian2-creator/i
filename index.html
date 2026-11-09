@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>地理マスター 100問 (第2弾・被りなし)</title>
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-light: #2dd4bf;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --radius: 16px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+        }
+        h1 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+        .progress-text { font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .filter-container::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .card-container {
+            perspective: 1000px;
+            flex: 1;
+            min-height: 330px;
+            display: flex;
+            cursor: pointer;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.4, 0.2, 0.2, 1);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .card-category {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .card-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            font-weight: 500;
+            color: var(--text);
+            overflow-y: auto;
+            margin: auto 0;
+            white-space: pre-wrap;
+        }
+        .card-back .card-content {
+            color: #166534;
+        }
+        .card-hint {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            padding-bottom: 12px;
+        }
+        .btn {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: background 0.1s;
+        }
+        .btn:active { background: #f1f5f9; }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .btn-primary:active { background: #115e59; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>地理マスター 100問 (2)</h1>
+            <div class="progress-text" id="progressText">1 / 100</div>
+        </header>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="filter-container" id="filterContainer">
+            <button class="filter-btn active" data-category="すべて">すべて (100)</button>
+            <button class="filter-btn" data-category="詳細・記録">詳細・記録</button>
+            <button class="filter-btn" data-category="言語の深掘り">言語の深掘り</button>
+            <button class="filter-btn" data-category="気候のメカニズム">気候のメカニズム</button>
+            <button class="filter-btn" data-category="穀物と貿易">穀物と貿易</button>
+            <button class="filter-btn" data-category="熱帯・砂漠問題">熱帯・砂漠問題</button>
+        </div>
+
+        <div class="card-container" id="cardContainer" onclick="toggleCard()">
+            <div class="card" id="card">
+                <div class="card-face card-front">
+                    <div>
+                        <div class="card-category" id="frontCategory">詳細・記録</div>
+                        <div class="card-content" id="frontContent">読み込み中...</div>
+                    </div>
+                    <div class="card-hint">タップして答えを表示</div>
+                </div>
+                <div class="card-face card-back">
+                    <div>
+                        <div class="card-category" id="backCategory">答え</div>
+                        <div class="card-content" id="backContent">答え</div>
+                    </div>
+                    <div class="card-hint">タップして問題に戻る</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="prevCard()">◀ 前へ</button>
+            <button class="btn" onclick="shuffleCards()">シャッフル</button>
+            <button class="btn btn-primary" onclick="nextCard()">次へ ▶</button>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'geo-app-v2';
+                self.addEventListener('install', e => {
+                    e.waitUntil(
+                        caches.open(CACHE_NAME).then(cache => cache.addAll(['./']))
+                    );
+                    self.skipWaiting();
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(response => response || fetch(e.request))
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const blobUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(blobUrl).catch(() => {});
+        }
+
+        const allQuestions = [
+            // 【詳細・記録】(1~20)
+            { cat: "詳細・記録", q: "「Def.」のノートにおける正式な意味（英語の略称含む）は何か？", a: "用語の説明（definition の略）[cite: 2]" },
+            { cat: "詳細・記録", q: "「Prop.」のノートにおける正式な意味（英語の略称含む）は何か？", a: "傾向等の殊に重要な事実（Property（定理）の略）[cite: 2]" },
+            { cat: "詳細・記録", q: "地震調査研究推進本部が認定する主要活断層帯の確率分類で、30年以内の発生確率が「0.1%以上3%未満」のランクは？", a: "Aランク[cite: 3]" },
+            { cat: "詳細・記録", q: "地震調査研究推進本部が認定する主要活断層帯の確率分類で、30年以内の発生確率が「0.1%未満」のランクは？", a: "Zランク[cite: 3]" },
+            { cat: "詳細・記録", q: "地震調査研究推進本部による活断層帯の分類で、確率が「不明」とされる場合の記号は？", a: "X[cite: 3]" },
+            { cat: "詳細・記録", q: "ノートに記載されている過去の主な地震のうち、1995年の阪神・淡路大震災のマグニチュードは？", a: "7.3[cite: 3]" },
+            { cat: "詳細・記録", q: "ノートに記載されている2004年の新潟県中越地震のマグニチュードは？", a: "6.8[cite: 3]" },
+            { cat: "詳細・記録", q: "ノートに記載されている2011年の東日本大震災のマグニチュードは？", a: "9.0[cite: 3]" },
+            { cat: "詳細・記録", q: "ノートに記載されている2018年の北海道胆振東部地震のマグニチュードは？", a: "6.7[cite: 3]" },
+            { cat: "詳細・記録", q: "ノートに記載されている2024年の能登半島地震のマグニチュードは？", a: "7.6[cite: 3]" },
+            { cat: "詳細・記録", q: "令和8年8月豪雨（千葉県豪雨）において発令された、制度変更以来初となった警報は何か？", a: "レベル5 大雨特別警報[cite: 4]" },
+            { cat: "詳細・記録", q: "千葉県豪雨で発令された「記録的短時間大雨情報」の発令回数は何回か？", a: "25回[cite: 4]" },
+            { cat: "詳細・記録", q: "千葉県豪雨の想定として、年は通常1時間に何mmの降水を想定しているか？", a: "50〜60mm/h[cite: 4]" },
+            { cat: "詳細・記録", q: "世界に存在する言語の総数はノートによるとおよそいくつ以上か？", a: "7100以上[cite: 4]" },
+            { cat: "詳細・記録", q: "大気循環の図（図1）において、赤道付近にある上昇気流の帯の名前は？", a: "熱帯収束帯[cite: 6]" },
+            { cat: "詳細・記録", q: "大気循環において、低緯度から順に「ハドレー循環」「フェレル循環」と並ぶ、高緯度側の循環の名前は？", a: "極循環[cite: 6]" },
+            { cat: "詳細・記録", q: "高緯度地域にある高圧帯の名称は何か？", a: "極高圧帯[cite: 6]" },
+            { cat: "詳細・記録", q: "中緯度地域にある高圧帯の名称は何か？", a: "中緯度高圧帯[cite: 6]" },
+            { cat: "詳細・記録", q: "高緯度側の低圧帯の名称は何か？", a: "高緯度低圧帯[cite: 6]" },
+            { cat: "詳細・記録", q: "熱帯収束帯から中緯度高圧帯に向かって吹く恒常風の名称は？", a: "貿易風[cite: 6]" },
+
+            // 【言語の深掘り】(21~40)
+            { cat: "言語の深掘り", q: "アジア・アフリカ地域で公用語となるケースが多いのは、植民地時代の何の言語か？", a: "旧宗主国の言語[cite: 4]" },
+            { cat: "言語の深掘り", q: "公用語話者数ランキングの第1位から第4位までの言語は？", a: "1位：英語、2位：中国語、3位：西語（スペイン語）、4位：アラビア語[cite: 5]" },
+            { cat: "言語の深掘り", q: "母語話者数ランキングの第1位から第3位までの言語は？", a: "1位：中国語、2位：西語、3位：英語[cite: 5]" },
+            { cat: "言語の深掘り", q: "母語話者数ランキングにおいて、英語の次（第4位〜第6位）に続く言語は何か？", a: "4位：ヒンディー語、5位：アラビア語、6位：ベンガル語[cite: 5]" },
+            { cat: "言語の深掘り", q: "スペイン語（西語）が広く通じる地域として、ラテンアメリカのほかにどこがあるか？", a: "合衆国内のヒスパニック系住民の間[cite: 5]" },
+            { cat: "言語の深掘り", q: "話者数2億7000万人で、アルファベット表記で日本人に発音が親しみやすいとされる言語は？", a: "尼語（インドネシア語）[cite: 5]" },
+            { cat: "言語の深掘り", q: "中国からの生産拠点移転により近年需要が高まっている言語は何か？", a: "越語（ベトナム語）[cite: 5]" },
+            { cat: "言語の深掘り", q: "石油産業、観光、IT等で高い需要を持つ言語は何か？", a: "アラビア語[cite: 5]" },
+            { cat: "言語の深掘り", q: "フランスのみならず西・中部アフリカで広く通用し、2050年に世界で最も話されると試算される言語は？", a: "仏語（フランス語）[cite: 5]" },
+            { cat: "言語の深掘り", q: "スイスの公用語に含まれる、あまり一般的ではないもう一つの言語は何か？", a: "ロマンシュ語[cite: 5]" },
+            { cat: "言語の深掘り", q: "国連の公用語6つのうち、英語、中国語、仏語、西語、アラビア語以外の残る1つは？", a: "露語（ロシア語）[cite: 5]" },
+            { cat: "言語の深掘り", q: "語族の中で、より一層の親戚関係を持つ諸言語のグループを指す言葉は何か？", a: "語派[cite: 5]" },
+            { cat: "言語の深掘り", q: "中国語が広く用いられている背景にある、巨大な市場としての性質は何か？", a: "中国という巨大単一市場[cite: 5]" },
+            { cat: "言語の深掘り", q: "シンガポールの公用語4つのうち、マレー語、中国語、英語以外のもう1つは？", a: "タミル語[cite: 5]" },
+            { cat: "言語の深掘り", q: "カナダの公用語とされている2つの言語は英語と何か？", a: "仏語（フランス語）[cite: 5]" },
+            { cat: "言語の深掘り", q: "スイスの公用語4つをすべて答えよ。", a: "ロマンシュ語、ドイツ語、仏語、イタリア語[cite: 5]" },
+            { cat: "言語の深掘り", q: "「母語」の定義として、子供の頃から何を聞いて身につけた言語か？", a: "周囲の人間が話すのを聞いて自然に身に着けた言語[cite: 4]" },
+            { cat: "言語の深掘り", q: "「公用語」の定義として、その国でどのように使われる言語か？", a: "公式に使われる言語[cite: 4]" },
+            { cat: "言語の深掘り", q: "アジア・アフリカで旧宗主国の言語が公用語になりやすいのは、かつての何時代の影響か？", a: "植民地時代[cite: 4]" },
+            { cat: "言語の深掘り", q: "母語話者数ランキングで第4位に位置する言語は何か？", a: "ヒンディー語[cite: 5]" },
+
+            // 【気候のメカニズム】(41~65)
+            { cat: "気候のメカニズム", q: "夏は海から大陸へ、冬は大陸から海へ吹く風の要因として、陸と海の何の違いが大きいか？", a: "比熱[cite: 6]" },
+            { cat: "気候のメカニズム", q: "比熱が大きいのは、海と陸のどちらか？", a: "海（陸は小さい）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "夏に大陸で発生しやすい気圧配置は高圧・低圧のどちらか？", a: "低圧（上昇気流が発生するため）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "冬に大陸で発生しやすい気圧配置は高圧・低圧のどちらか？", a: "高圧（下降気流が発生するため）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "インドのチェラプンジで夏に膨大な降水があるのは、モンスーンが最初にどこにぶつかるからか？", a: "高い山岳[cite: 7]" },
+            { cat: "気候のメカニズム", q: "チリのアントファガスタ（アタカマ砂漠）で下層に寒冷な空気がたまり降水が起きない原因の海流は？", a: "ペルー海流（寒流）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "海流が果たす大きな役割として、低緯度帯の何を高緯度帯に輸送することか？", a: "熱エネルギー[cite: 7]" },
+            { cat: "気候のメカニズム", q: "低緯度帯から高緯度帯に流れる海流は一般に何と呼ばれるか？", a: "暖流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "高緯度帯から低緯度帯に流れる海流は一般に何と呼ばれるか？", a: "寒流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "西欧の沿岸部に影響を与えている暖流の名前は？", a: "北大西洋海流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "アラスカ南部に影響を与えている暖流の名前は？", a: "アラスカ海流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "モロッコ付近を流れる寒流の名前は？", a: "カナリア海流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "アフリカ南西部を流れる寒流の名前は？", a: "ベンゲラ海流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "アメリカ西海岸を流れる寒流の名前は？", a: "カリフォルニア海流[cite: 7]" },
+            { cat: "気候のメカニズム", q: "野生のペンギン18種はすべてどこに生息しているか？", a: "南半球[cite: 7]" },
+            { cat: "気候のメカニズム", q: "ペンギンのすべての種の祖であるとされている、原産の地域はどこか？", a: "ニュージーランド（コガタペンギン）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "南半球の寒流は南極から赤道へどちら回りに吹くか？", a: "反時計回り[cite: 7]" },
+            { cat: "気候のメカニズム", q: "ペンギンが赤道を超えることができないのはなぜか？", a: "寒流が南極から赤道へ反時計回りに吹くため（暖流を越えられない）[cite: 7]" },
+            { cat: "気候のメカニズム", q: "ケッペンの気候区分が「狭い範囲（都道府県など）の比較」に適さない理由は何か？", a: "地球規模の植生に基づいて区分されているため[cite: 8]" },
+            { cat: "気候のメカニズム", q: "温帯（C）に分類されるための最寒月平均気温の条件は？", a: "-3℃以上（積雪が根雪にならない限界）[cite: 8]" },
+            { cat: "気候のメカニズム", q: "冷帯（D）に分類されるための最寒月平均気温の条件は？", a: "-3℃未満かつ最暖月平均気温10℃以上[cite: 8]" },
+            { cat: "気候のメカニズム", q: "寒帯（E）に分類されるための最暖月平均気温の条件は？", a: "10℃未満[cite: 8]" },
+            { cat: "気候のメカニズム", q: "熱帯雨林（Af）に見られる熱帯林は、何という3層構造で構成されているか？", a: "超高木層、高木層、低木層[cite: 9]" },
+            { cat: "気候のメカニズム", q: "熱帯雨林の高木層の高さは最高で何mに達するか？", a: "30〜50m[cite: 9]" },
+            { cat: "気候のメカニズム", q: "オーストラリアの国土のうち、乾燥帯が占める割合は何％か？", a: "57.2%（乾燥大陸と呼ばれる）[cite: 9]" },
+
+            // 【穀物と貿易】(66~85)
+            { cat: "穀物と貿易", q: "米の生産量ランキングで第3位から第6位までの国は？", a: "3位：バングラデシュ、4位：インドネシア、5位：ベトナム、6位：タイ[cite: 10]" },
+            { cat: "穀物と貿易", q: "米が自給的作物とされ、生産全体の何％ほどしか輸出されないか？", a: "約6.5%[cite: 10]" },
+            { cat: "穀物と貿易", q: "小麦の輸出量ランキングで第1位から第3位までの国は？", a: "1位：ロシア、2位：オーストラリア、3位：カナダ[cite: 11]" },
+            { cat: "穀物と貿易", q: "小麦生産量の約半分が輸出される、商業的な作物のことを何というか？", a: "商品作物[cite: 11]" },
+            { cat: "穀物と貿易", q: "オーストラリアなどが輸出に有利とされる理由の一つとして、北半球と季節が逆で何ができるか？", a: "端境期に大量出荷が可能[cite: 11]" },
+            { cat: "穀物と貿易", q: "ウクライナ侵攻が日本のうどんの価格高騰に寄与しうるとされるのはなぜか？", a: "ロシア・ウクライナが中東・アフリカ等への小麦輸出の中核を担っており、価格高騰を招くため[cite: 11]" },
+            { cat: "穀物と貿易", q: "トウモロコシの生産量ランキングで第3位から第6位までの国は？", a: "3位：ブラジル、4位：アルゼンチン、5位：インド、6位：ウクライナ[cite: 12]" },
+            { cat: "穀物と貿易", q: "トウモロコシの生産量のうち、輸出用に回される割合は何％か？", a: "16%[cite: 12]" },
+            { cat: "穀物と貿易", q: "トウモロコシ粉を処理して得られる、飼料や清涼飲料水の糖化製品等に利用される澱粉を何というか？", a: "コーンスターチ[cite: 12]" },
+            { cat: "穀物と貿易", q: "トウモロコシの種類のうち、ポップコーン用に用いられるものは何か？", a: "ポップ種[cite: 12]" },
+            { cat: "穀物と貿易", q: "トウモロコシの主な栽培地域として、アメリカのコーンベルトの中心となる州を3つ挙げよ。", a: "アイオワ州、イリノイ州、ネブラスカ州（およびミネソタ州）[cite: 12]" },
+            { cat: "穀物と貿易", q: "ブラジルのトウモロコシ栽培の中心地となっている州の名前は？", a: "マットグロッソ州[cite: 12]" },
+            { cat: "穀物と貿易", q: "アルゼンチンのトウモロコシ栽培の中心地となっている平原の名称は？", a: "パンパ[cite: 12]" },
+            { cat: "穀物と貿易", q: "バイオマスのうち、糖質や澱粉など食料由来のものを何世代と呼ぶか？", a: "第一世代[cite: 12]" },
+            { cat: "穀物と貿易", q: "バイオマスのうち、廃材など食料以外を原材料とするものを何世代と呼ぶか？", a: "第二世代[cite: 12]" },
+            { cat: "穀物と貿易", q: "バイオエタノールが「大気中の二酸化炭素を増やさない（再生可能エネルギー）」とされる理由は何か？", a: "生物が生育中に吸収した二酸化炭素が、燃焼時の排出を相殺するため[cite: 13]" },
+            { cat: "穀物と貿易", q: "第一世代のバイオエタノールは何の代替燃料として使われるか？", a: "ガソリン[cite: 13]" },
+            { cat: "穀物と貿易", q: "小麦の栽培品種のうち、栽培期間が延びて収穫量が増えるという利点があるのはどちらか？", a: "冬小麦[cite: 10, 11]" },
+            { cat: "穀物と貿易", q: "春に種をまく小麦（春小麦）には、どのような加工品に適するという利点があるか？", a: "パンに適する[cite: 11]" },
+            { cat: "穀物と貿易", q: "企業的穀物農業がおこなわれるBS気候などで見られる肥沃な土壌のうち、プレーリー土以外のもう一つは？", a: "チェルノーゼム[cite: 11]" },
+
+            // 【熱帯・砂漠問題】(86~100)
+            { cat: "熱帯・砂漠問題", q: "キャッサバの生産量ランキングで第1位から第3位までの国は？", a: "1位：ナイジェリア、2位：コンゴ民主共和国、3位：タイ[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "イモ類を主食とする地域は主にどの気候帯か？", a: "熱帯[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "カカオ豆の生産量ランキングで第1位から第3位までの国は？", a: "1位：コートジボワール、2位：ガーナ、3位：インドネシア[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "モノカルチャー経済が不安定である最大の理由は何か？", a: "国際価格の変動、天候、資源の埋蔵量などの外的要因に左右されやすいため[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "モノカルチャー経済が安全保障上も好ましくないとされる、食料に関する問題は何か？", a: "食料自給率が低下し、食料の輸入に依存することになるため[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "2010年から2020年の間に減少した世界の森林面積は、どの国より大きいか？", a: "日本（4700万haを超える減少）[cite: 13]" },
+            { cat: "熱帯・砂漠問題", q: "熱帯林が供給している、西洋医薬の原料の割合は何％か？", a: "25%[cite: 13]" },
+            { cat: "热帯・砂漠問題", q: "熱帯林の破壊を進めている主な人間活動を3つ挙げよ。", a: "木材の商業伐採、大規模な農地への転用、ダムや鉱山の建設[cite: 14]" },
+            { cat: "熱帯・砂漠問題", q: "油やしから取れる油を何というか？", a: "パーム油[cite: 14]" },
+            { cat: "热帯・砂漠問題", q: "パーム油が「見えない油」と呼ばれるのはなぜか？", a: "加工されて原材料名に表示されないことも多いため[cite: 14]" },
+            { cat: "热帯・砂漠問題", q: "パーム油の原料である油やしの利点として、一度植栽すればどうなることがあるか？", a: "年間を通じて絶えず収穫可能であること[cite: 14]" },
+            { cat: "热帯・砂漠問題", q: "オアシス都市の例としてノートに挙げられている2つの都市は？", a: "タシュケント（ウズベキスタン）、ラスベガス（アメリカ合衆国）[cite: 14]" },
+            { cat: "热帯・砂漠問題", q: "砂漠においてカナートと呼ばれるものは何か？", a: "地下水路（オアシス農業で利用される）[cite: 14]" },
+            { cat: "热帯・砂漠問題", q: "アラル海はどこの川を流入河川に持っていたか（2つ）？", a: "アムダリア川、シルダリア川[cite: 15]" },
+            { cat: "热帯・砂漠問題", q: "ソ連によるアラル海の灌漑事業（自然改造計画）で栽培されていた作物は何か？", a: "綿花[cite: 15]" }
+        ];
+
+        let currentFiltered = [...allQuestions];
+        let currentIndex = 0;
+        let currentCategory = "すべて";
+
+        const card = document.getElementById("card");
+        const frontCategory = document.getElementById("frontCategory");
+        const frontContent = document.getElementById("frontContent");
+        const backCategory = document.getElementById("backCategory");
+        const backContent = document.getElementById("backContent");
+        const progressText = document.getElementById("progressText");
+        const progressBar = document.getElementById("progressBar");
+
+        function updateCard() {
+            if (currentFiltered.length === 0) {
+                frontCategory.innerText = "お知らせ";
+                frontContent.innerText = "該当する問題がありません";
+                backCategory.innerText = "お知らせ";
+                backContent.innerText = "別のカテゴリーを選択してください";
+                progressText.innerText = "0 / 0";
+                progressBar.style.width = "0%";
+                return;
+            }
+
+            if (currentIndex >= currentFiltered.length) currentIndex = 0;
+            if (currentIndex < 0) currentIndex = currentFiltered.length - 1;
+
+            const q = currentFiltered[currentIndex];
+            card.classList.remove("is-flipped");
+
+            setTimeout(() => {
+                frontCategory.innerText = q.cat;
+                frontContent.innerText = q.q;
+                backCategory.innerText = q.cat + " (答え)";
+                backContent.innerText = q.a;
+                
+                progressText.innerText = `${currentIndex + 1} / ${currentFiltered.length}`;
+                progressBar.style.width = `${((currentIndex + 1) / currentFiltered.length) * 100}%`;
+            }, 150);
+        }
+
+        function toggleCard() {
+            card.classList.toggle("is-flipped");
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % currentFiltered.length;
+            updateCard();
+        }
+
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + currentFiltered.length) % currentFiltered.length;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentFiltered.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentFiltered[i], currentFiltered[j]] = [currentFiltered[j], currentFiltered[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
+                
+                currentCategory = e.target.getAttribute("data-category");
+                if (currentCategory === "すべて") {
+                    currentFiltered = [...allQuestions];
+                } else {
+                    currentFiltered = allQuestions.filter(item => item.cat === currentCategory);
+                }
+                currentIndex = 0;
+                updateCard();
+            });
+        });
+
+        updateCard();
+    </script>
+</body>
+</html>
